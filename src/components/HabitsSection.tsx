@@ -188,6 +188,12 @@ function HabitCardItem({
             </Text>
           ) : null}
 
+          {habit.dueDate ? (
+            <Text style={[styles.dueDateText, { color: isFeatured ? 'rgba(255,255,255,0.8)' : Colors.boldSecondaryText }]}>
+              📅 Due {habit.dueDate}
+            </Text>
+          ) : null}
+
           <View style={styles.habitMeta}>
             <Text style={[styles.streakText, { color: isFeatured ? Colors.white : Colors.boldCoral }]}>
               🔥 {habit.streak} Streak
@@ -274,6 +280,7 @@ const styles = StyleSheet.create({
   habitName: { fontSize: 16, fontWeight: '900' },
   habitDesc: { fontSize: 12 },
   habitMeta: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 },
+  dueDateText: { fontSize: 11, fontWeight: '700' },
   streakText: { fontSize: 12, fontWeight: '900' },
   rewardRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   rewardText: { fontSize: 11, fontWeight: '700' },

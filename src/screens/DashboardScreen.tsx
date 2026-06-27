@@ -14,6 +14,7 @@ import { DailyQuestsSection } from '../components/DailyQuestsSection';
 import { HabitsSection } from '../components/HabitsSection';
 import { GoldShopSection } from '../components/GoldShopSection';
 import { AddHabitModal } from '../components/AddHabitModal';
+import { TodayProgressCard } from '../components/TodayProgressCard';
 import { Colors } from '../theme/colors';
 
 export function DashboardScreen() {
@@ -63,7 +64,10 @@ export function DashboardScreen() {
           </View>
         </View>
 
-        {/* 1. Player Profile Card */}
+        {/* 1. Today Progress */}
+        <TodayProgressCard habits={habits} />
+
+        {/* 2. Player Profile Card */}
         <PlayerProfileCard userStats={userStats} />
 
         {/* 2. Hero Streak Widget */}
@@ -105,9 +109,9 @@ export function DashboardScreen() {
       <AddHabitModal
         visible={showModal}
         onDismiss={() => setShowModal(false)}
-        onAdd={async (name, desc, diff, cat) => {
+        onAdd={async (name, desc, diff, cat, dueDate) => {
           setShowModal(false);
-          await addHabit(name, desc, diff, cat);
+          await addHabit(name, desc, diff, cat, dueDate);
         }}
       />
     </SafeAreaView>

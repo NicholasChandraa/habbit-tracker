@@ -22,6 +22,7 @@ export interface Habit {
   streak: number;
   lastCompletedDate: string;
   createdTimestamp: number;
+  dueDate: string; // 'YYYY-MM-DD' or '' if none
 }
 
 export interface DailyQuest {

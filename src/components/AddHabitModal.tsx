@@ -3,13 +3,21 @@ import {
   Modal, View, Text, StyleSheet, TouchableOpacity,
   TextInput, ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { DIFFICULTIES, CATEGORIES } from '../database/types';
 import { Colors } from '../theme/colors';
 
 interface Props {
   visible: boolean;
   onDismiss: () => void;
-  onAdd: (name: string, description: string, difficulty: string, category: string) => void;
+  onAdd: (name: string, description: string, difficulty: string, category: string, dueDate: string) => void;
+}
+
+function toDateString(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 export function AddHabitModal({ visible, onDismiss, onAdd }: Props) {
@@ -17,23 +25,34 @@ export function AddHabitModal({ visible, onDismiss, onAdd }: Props) {
   const [description, setDescription] = useState('');
   const [difficulty, setDifficulty] = useState<string>('Easy');
   const [category, setCategory] = useState<string>('Health');
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [showIOSPicker, setShowIOSPicker] = useState(false);
+
+  const openDatePicker = () => {
+    if (Platform.OS === 'android') {
+      DateTimePickerAndroid.open({
+        value: dueDate ?? new Date(),
+        minimumDate: new Date(),
+        mode: 'date',
+        onValueChange: (_, selected) => { if (selected) setDueDate(selected); },
+      });
+    } else {
+      setShowIOSPicker(true);
+    }
+  };
+
+  const reset = () => {
+    setName(''); setDescription(''); setDifficulty('Easy');
+    setCategory('Health'); setDueDate(null); setShowIOSPicker(false);
+  };
 
   const handleAdd = () => {
     if (!name.trim()) return;
-    onAdd(name.trim(), description.trim(), difficulty, category);
-    setName('');
-    setDescription('');
-    setDifficulty('Easy');
-    setCategory('Health');
+    onAdd(name.trim(), description.trim(), difficulty, category, dueDate ? toDateString(dueDate) : '');
+    reset();
   };
 
-  const handleDismiss = () => {
-    setName('');
-    setDescription('');
-    setDifficulty('Easy');
-    setCategory('Health');
-    onDismiss();
-  };
+  const handleDismiss = () => { reset(); onDismiss(); };
 
   return (
     <Modal
@@ -105,6 +124,28 @@ export function AddHabitModal({ visible, onDismiss, onAdd }: Props) {
                   );
                 })}
               </ScrollView>
+              {/* Due Date */}
+              <Text style={styles.selectorLabel}>Due Date (Optional)</Text>
+              <TouchableOpacity style={styles.dateButton} onPress={openDatePicker}>
+                <Text style={styles.dateButtonText}>
+                  {dueDate ? toDateString(dueDate) : 'No due date'}
+                </Text>
+                {dueDate && (
+                  <TouchableOpacity onPress={() => setDueDate(null)}>
+                    <Text style={styles.clearDate}>✕</Text>
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
+
+              {showIOSPicker && (
+                <DateTimePicker
+                  value={dueDate ?? new Date()}
+                  minimumDate={new Date()}
+                  mode="date"
+                  display="inline"
+                  onValueChange={(_, selected) => { if (selected) setDueDate(selected); }}
+                />
+              )}
             </ScrollView>
 
             {/* Buttons */}
@@ -189,6 +230,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     marginTop: 8,
+  },
+  dateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 2,
+    borderColor: Colors.boldBorder,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: Colors.boldBg,
+  },
+  dateButtonText: {
+    fontSize: 15,
+    color: Colors.boldPrimaryText,
+  },
+  clearDate: {
+    fontSize: 14,
+    color: Colors.boldSecondaryText,
+    paddingHorizontal: 4,
   },
   cancelButton: {
     paddingHorizontal: 12,

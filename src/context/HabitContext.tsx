@@ -12,7 +12,7 @@ import {
   buyShopItem,
   useXPBoostPotion,
   equipAvatar,
-} from '../database/database';
+} from '../database';
 
 // ─── State & Actions ──────────────────────────────────────────────────────────
 
@@ -49,7 +49,7 @@ const initialState: HabitState = {
 
 interface HabitContextValue extends HabitState {
   refresh: () => Promise<void>;
-  addHabit: (name: string, description: string, difficulty: string, category: string) => Promise<void>;
+  addHabit: (name: string, description: string, difficulty: string, category: string, dueDate?: string) => Promise<void>;
   removeHabit: (habitId: number) => Promise<void>;
   markHabitComplete: (habit: Habit) => Promise<void>;
   claimQuest: (quest: DailyQuest) => Promise<void>;
@@ -83,8 +83,8 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
     })();
   }, [refresh]);
 
-  const addHabit = useCallback(async (name: string, description: string, difficulty: string, category: string) => {
-    await insertHabit(name, description, difficulty, category);
+  const addHabit = useCallback(async (name: string, description: string, difficulty: string, category: string, dueDate = '') => {
+    await insertHabit(name, description, difficulty, category, dueDate);
     await refresh();
   }, [refresh]);
 
