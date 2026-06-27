@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { UserStats, SHOP_ITEMS, hasItem } from '../database/types';
 import { Colors } from '../theme/colors';
@@ -12,83 +12,76 @@ interface Props {
 }
 
 const ITEM_EMOJIS: Record<string, string> = {
-  crown: '👑',
-  wings: '🪶',
-  shield: '🛡️',
-  staff: '🪄',
+  crown: '👑', wings: '🪶', shield: '🛡️', staff: '🪄',
 };
 
 export function GoldShopSection({ userStats, onBuyItem, onBuyPotion, onEquipAvatar }: Props) {
   return (
-    <View style={styles.section}>
-      {/* Header */}
-      <View style={styles.sectionHeader}>
+    <View className="gap-3">
+      <View className="flex-row items-center gap-2">
         <Ionicons name="cart" size={22} color={Colors.boldPrimary} />
-        <Text style={styles.sectionTitle}>RPG ARMORY & SHOP</Text>
+        <Text className="text-sm font-black text-bold-text tracking-widest">RPG ARMORY & SHOP</Text>
       </View>
 
       {/* XP Elixir */}
-      <View style={styles.card}>
-        <View style={styles.itemRow}>
-          <View style={[styles.iconBox, { backgroundColor: Colors.boldPinkAccent }]}>
-            <Text style={styles.emoji}>🧪</Text>
+      <View className="bg-bold-surface rounded-[28px] border-2 border-bold-border p-4">
+        <View className="flex-row items-center gap-4">
+          <View className="w-11 h-11 rounded-xl items-center justify-center bg-bold-pink">
+            <Text style={{ fontSize: 22 }}>🧪</Text>
           </View>
-          <View style={styles.itemDetails}>
-            <Text style={styles.itemName}>XP Booster Elixir</Text>
-            <Text style={styles.itemDesc}>Instantly drink to gain +50 EXP points.</Text>
+          <View className="flex-1">
+            <Text className="text-sm font-black text-bold-text">XP Booster Elixir</Text>
+            <Text className="text-xs text-bold-text-secondary mt-0.5">Instantly drink to gain +50 EXP points.</Text>
           </View>
           <TouchableOpacity
-            style={[styles.actionButton, { backgroundColor: Colors.boldPrimary, opacity: userStats.coins >= 15 ? 1 : 0.4 }]}
+            className="rounded-xl px-3 py-2 bg-bold-primary"
+            style={{ opacity: userStats.coins >= 15 ? 1 : 0.4 }}
             onPress={onBuyPotion}
             disabled={userStats.coins < 15}
           >
-            <Text style={styles.actionButtonText}>BUY (15g)</Text>
+            <Text className="text-xs font-black text-white">BUY (15g)</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Shop Items */}
       {SHOP_ITEMS.map((item) => {
         const owns = hasItem(userStats, item.id);
         const isEquipped = userStats.equippedAvatar === item.id;
         const canAfford = userStats.coins >= item.cost;
 
         return (
-          <View
-            key={item.id}
-            style={[styles.card, isEquipped && { borderColor: Colors.boldPrimary }]}
-          >
-            <View style={styles.itemRow}>
-              <View style={[styles.iconBox, { backgroundColor: Colors.boldPrimaryContainer }]}>
-                <Text style={styles.emoji}>{ITEM_EMOJIS[item.id] ?? '⚔️'}</Text>
+          <View key={item.id} className="bg-bold-surface rounded-[28px] border-2 p-4"
+            style={{ borderColor: isEquipped ? Colors.boldPrimary : Colors.boldBorder }}>
+            <View className="flex-row items-center gap-4">
+              <View className="w-11 h-11 rounded-xl items-center justify-center bg-bold-primary-container">
+                <Text style={{ fontSize: 22 }}>{ITEM_EMOJIS[item.id] ?? '⚔️'}</Text>
               </View>
-
-              <View style={styles.itemDetails}>
-                <Text style={styles.itemName}>{item.name}</Text>
-                <Text style={styles.itemDesc}>{item.description}</Text>
+              <View className="flex-1">
+                <Text className="text-sm font-black text-bold-text">{item.name}</Text>
+                <Text className="text-xs text-bold-text-secondary mt-0.5">{item.description}</Text>
               </View>
-
               {!owns ? (
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: Colors.boldGold, opacity: canAfford ? 1 : 0.4 }]}
+                  className="rounded-xl px-3 py-2"
+                  style={{ backgroundColor: Colors.boldGold, opacity: canAfford ? 1 : 0.4 }}
                   onPress={() => onBuyItem(item.id, item.cost)}
                   disabled={!canAfford}
                 >
-                  <Text style={styles.actionButtonText}>{item.cost}g</Text>
+                  <Text className="text-xs font-black text-white">{item.cost}g</Text>
                 </TouchableOpacity>
               ) : isEquipped ? (
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: Colors.boldBorder }]}
+                  className="rounded-xl px-3 py-2 bg-bold-border"
                   onPress={() => onEquipAvatar('default')}
                 >
-                  <Text style={[styles.actionButtonText, { color: Colors.boldPrimaryText }]}>UNEQUIP</Text>
+                  <Text className="text-xs font-black text-bold-text">UNEQUIP</Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
-                  style={[styles.actionButton, { backgroundColor: Colors.boldPrimary }]}
+                  className="rounded-xl px-3 py-2 bg-bold-primary"
                   onPress={() => onEquipAvatar(item.id)}
                 >
-                  <Text style={styles.actionButtonText}>EQUIP</Text>
+                  <Text className="text-xs font-black text-white">EQUIP</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -98,46 +91,3 @@ export function GoldShopSection({ userStats, onBuyItem, onBuyPotion, onEquipAvat
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  section: { gap: 12 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  sectionTitle: {
-    fontSize: 14, fontWeight: '900', color: Colors.boldPrimaryText, letterSpacing: 1,
-  },
-  card: {
-    backgroundColor: Colors.boldSurface,
-    borderRadius: 28,
-    borderWidth: 2,
-    borderColor: Colors.boldBorder,
-    padding: 16,
-  },
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  emoji: { fontSize: 22 },
-  itemDetails: { flex: 1 },
-  itemName: {
-    fontSize: 14, fontWeight: '900', color: Colors.boldPrimaryText,
-  },
-  itemDesc: {
-    fontSize: 12, color: Colors.boldSecondaryText, marginTop: 2,
-  },
-  actionButton: {
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  actionButtonText: {
-    fontSize: 12, fontWeight: '900', color: Colors.white,
-  },
-});

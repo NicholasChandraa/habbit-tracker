@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
 import { Habit } from '../database/types';
-import { Colors } from '../theme/colors';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -19,25 +18,23 @@ export function TodayProgressCard({ habits }: Props) {
   const pct = total > 0 ? done / total : 0;
 
   return (
-    <View style={styles.card}>
-      {/* Date */}
-      <View style={styles.dateRow}>
+    <View className="bg-bold-surface rounded-[28px] border-2 border-bold-border p-5 gap-3">
+      <View className="flex-row justify-between items-center">
         <View>
-          <Text style={styles.dayName}>{DAY_NAMES[now.getDay()]}</Text>
-          <Text style={styles.dateText}>{now.getDate()} {MONTH_NAMES[now.getMonth()]} {now.getFullYear()}</Text>
+          <Text className="text-[11px] font-black text-bold-primary tracking-widest uppercase">{DAY_NAMES[now.getDay()]}</Text>
+          <Text className="text-xl font-black text-bold-text">{now.getDate()} {MONTH_NAMES[now.getMonth()]} {now.getFullYear()}</Text>
         </View>
-        <View style={styles.countBadge}>
-          <Text style={styles.countText}>{done}/{total}</Text>
-          <Text style={styles.countLabel}>done</Text>
+        <View className="items-center bg-bold-primary-container rounded-2xl px-4 py-2">
+          <Text className="text-lg font-black text-bold-primary">{done}/{total}</Text>
+          <Text className="text-[10px] font-black text-bold-primary tracking-widest">done</Text>
         </View>
       </View>
 
-      {/* Progress bar */}
-      <View style={styles.track}>
-        <View style={[styles.fill, { width: `${pct * 100}%` }]} />
+      <View className="h-2 bg-bold-border rounded-full overflow-hidden">
+        <View className="h-full bg-bold-primary rounded-full" style={{ width: `${pct * 100}%` }} />
       </View>
 
-      <Text style={styles.caption}>
+      <Text className="text-xs font-bold text-bold-text-secondary">
         {total === 0
           ? 'No quests yet — forge one!'
           : done === total
@@ -47,65 +44,3 @@ export function TodayProgressCard({ habits }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: Colors.boldSurface,
-    borderRadius: 28,
-    borderWidth: 2,
-    borderColor: Colors.boldBorder,
-    padding: 20,
-    gap: 12,
-  },
-  dateRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  dayName: {
-    fontSize: 11,
-    fontWeight: '900',
-    color: Colors.boldPrimary,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-  },
-  dateText: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: Colors.boldPrimaryText,
-  },
-  countBadge: {
-    alignItems: 'center',
-    backgroundColor: Colors.boldPrimaryContainer,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  countText: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: Colors.boldPrimary,
-  },
-  countLabel: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: Colors.boldPrimary,
-    letterSpacing: 1,
-  },
-  track: {
-    height: 8,
-    backgroundColor: Colors.boldBorder,
-    borderRadius: 999,
-    overflow: 'hidden',
-  },
-  fill: {
-    height: '100%',
-    backgroundColor: Colors.boldPrimary,
-    borderRadius: 999,
-  },
-  caption: {
-    fontSize: 12,
-    color: Colors.boldSecondaryText,
-    fontWeight: '700',
-  },
-});

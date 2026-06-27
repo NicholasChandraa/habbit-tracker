@@ -50,6 +50,16 @@ async function initSchema(database: SQLite.SQLiteDatabase): Promise<void> {
       coin_reward INTEGER NOT NULL,
       date_string TEXT NOT NULL DEFAULT ''
     );
+
+    CREATE TABLE IF NOT EXISTS habit_completions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      habit_id INTEGER NOT NULL,
+      habit_name TEXT NOT NULL,
+      difficulty TEXT NOT NULL DEFAULT 'Easy',
+      category TEXT NOT NULL DEFAULT 'Health',
+      completed_date TEXT NOT NULL,
+      completed_timestamp INTEGER NOT NULL DEFAULT 0
+    );
   `);
   // ponytail: migrate existing installs — throws if column exists, that's fine
   try { await database.execAsync(`ALTER TABLE habits ADD COLUMN due_date TEXT NOT NULL DEFAULT ''`); } catch {}

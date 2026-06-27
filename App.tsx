@@ -1,11 +1,15 @@
+import './global.css';
 import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import { HabitProvider } from './src/context/HabitContext';
-import { DashboardScreen } from './src/screens/DashboardScreen';
+import { TabNavigator } from './src/navigation/TabNavigator';
 
 export default function App() {
   return (
     <HabitProvider>
-      <DashboardScreen />
+      <NavigationContainer>
+        <TabNavigator />
+      </NavigationContainer>
     </HabitProvider>
   );
 }

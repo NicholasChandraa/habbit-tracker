@@ -1,9 +1,9 @@
-import { Habit, getHabitXPReward, getHabitCoinReward } from './types';
+import { Habit, getHabitXPReward, getHabitCoinReward, addXP, addCoins } from './types';
 import { getDatabase } from './db';
 import { getTodayString, getYesterdayString } from './dateUtils';
 import { getOrInitUserStats, saveUserStats } from './userStatsRepo';
 import { updateQuestProgress } from './questRepo';
-import { addXP, addCoins } from './types';
+import { logCompletion } from './completionRepo';
 
 function rowToHabit(row: any): Habit {
   return {
@@ -56,6 +56,8 @@ export async function completeHabit(habit: Habit): Promise<void> {
   stats = addXP(stats, getHabitXPReward(habit.difficulty));
   stats = addCoins(stats, getHabitCoinReward(habit.difficulty));
   await saveUserStats(stats);
+
+  await logCompletion(habit);
 
   await updateQuestProgress('quest_first_victory', 1);
   await updateQuestProgress('quest_triathlon', 1);
