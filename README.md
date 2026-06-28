@@ -6,14 +6,13 @@ A habit tracking app with RPG game mechanics. Complete daily habits to earn XP, 
 
 ## Screenshots
 
-<!-- Add your screenshots here -->
-<!-- Example:
-![Dashboard](assets/screenshots/dashboard.png)
-![Quests](assets/screenshots/quests.png)
-![Armory](assets/screenshots/armory.png)
--->
+| Dashboard | Daily Quests | Active Quests |
+|:---------:|:------------:|:-------------:|
+| ![Dashboard](assets/ss-layar-1.png) | ![Daily Quests](assets/ss-layar-4.png) | ![Active Quests](assets/ss-layar-3.png) |
 
-> Add screenshots by creating an `assets/screenshots/` folder and uploading your images there.
+| Completed & History | Armory & Shop |
+|:-------------------:|:-------------:|
+| ![Completed](assets/ss-layar-5.png) | ![Armory](assets/ss-layar-2.png) |
 
 ---
 
