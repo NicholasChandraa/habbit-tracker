@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Share, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Habit, CATEGORIES } from '../database/types';
 import { Colors } from '../theme/colors';
@@ -10,6 +10,8 @@ interface Props {
   onCategoryChange: (cat: string) => void;
   onComplete: (habit: Habit) => void;
   onDelete: (habitId: number) => void;
+  onEdit: (habit: Habit) => void;
+  onViewDetail: (habit: Habit) => void;
 }
 
 const TODAY = (() => {
@@ -26,7 +28,7 @@ function getDifficultyColor(difficulty: string) {
   }
 }
 
-export function HabitsSection({ habits, selectedCategory, onCategoryChange, onComplete, onDelete }: Props) {
+export function HabitsSection({ habits, selectedCategory, onCategoryChange, onComplete, onDelete, onEdit, onViewDetail }: Props) {
   const filtered = selectedCategory === 'All' ? habits : habits.filter(h => h.category === selectedCategory);
   const active = filtered.filter(h => h.lastCompletedDate !== TODAY);
   const done   = filtered.filter(h => h.lastCompletedDate === TODAY);
@@ -72,13 +74,20 @@ export function HabitsSection({ habits, selectedCategory, onCategoryChange, onCo
         </View>
       ) : (
         active.map((habit) => (
-          <HabitCardItem key={habit.id} habit={habit} onComplete={() => onComplete(habit)} onDelete={() => onDelete(habit.id)} />
+          <HabitCardItem
+            key={habit.id}
+            habit={habit}
+            onComplete={() => onComplete(habit)}
+            onDelete={() => onDelete(habit.id)}
+            onEdit={() => onEdit(habit)}
+            onViewDetail={() => onViewDetail(habit)}
+          />
         ))
       )}
 
       {/* Completed Today */}
       {done.length > 0 && (
-        <CompletedTodaySection done={done} onComplete={onComplete} onDelete={onDelete} />
+        <CompletedTodaySection done={done} onComplete={onComplete} onDelete={onDelete} onEdit={onEdit} onViewDetail={onViewDetail} />
       )}
     </View>
   );
@@ -86,10 +95,12 @@ export function HabitsSection({ habits, selectedCategory, onCategoryChange, onCo
 
 const PAGE_SIZE = 5;
 
-function CompletedTodaySection({ done, onComplete, onDelete }: {
+function CompletedTodaySection({ done, onComplete, onDelete, onEdit, onViewDetail }: {
   done: Habit[];
   onComplete: (habit: Habit) => void;
   onDelete: (habitId: number) => void;
+  onEdit: (habit: Habit) => void;
+  onViewDetail: (habit: Habit) => void;
 }) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const visible = done.slice(0, visibleCount);
@@ -104,7 +115,14 @@ function CompletedTodaySection({ done, onComplete, onDelete }: {
         </Text>
       </View>
       {visible.map((habit) => (
-        <HabitCardItem key={habit.id} habit={habit} onComplete={() => onComplete(habit)} onDelete={() => onDelete(habit.id)} />
+        <HabitCardItem
+          key={habit.id}
+          habit={habit}
+          onComplete={() => onComplete(habit)}
+          onDelete={() => onDelete(habit.id)}
+          onEdit={() => onEdit(habit)}
+          onViewDetail={() => onViewDetail(habit)}
+        />
       ))}
       {remaining > 0 && (
         <TouchableOpacity className="items-center py-3 bg-bold-primary-container rounded-xl" onPress={() => setVisibleCount(v => v + PAGE_SIZE)}>
@@ -115,18 +133,35 @@ function CompletedTodaySection({ done, onComplete, onDelete }: {
   );
 }
 
-function HabitCardItem({ habit, onComplete, onDelete }: { habit: Habit; onComplete: () => void; onDelete: () => void }) {
+function HabitCardItem({ habit, onComplete, onDelete, onEdit, onViewDetail }: {
+  habit: Habit;
+  onComplete: () => void;
+  onDelete: () => void;
+  onEdit: () => void;
+  onViewDetail: () => void;
+}) {
   const isDoneToday = habit.lastCompletedDate === TODAY;
-  const isFeatured = !isDoneToday && (habit.difficulty === 'Medium' || habit.difficulty === 'Hard');
   const diffColor = getDifficultyColor(habit.difficulty);
+  const [menuVisible, setMenuVisible] = useState(false);
 
-  const cardBg = isDoneToday ? Colors.boldSurface : isFeatured ? Colors.boldPrimary : Colors.boldSurface;
-  const contentColor = isFeatured ? Colors.white : Colors.boldPrimaryText;
-  const subColor = isFeatured ? 'rgba(255,255,255,0.8)' : Colors.boldSecondaryText;
-  const borderColor = isFeatured ? Colors.boldPrimary : Colors.boldBorder;
+  const handleShare = async () => {
+    setMenuVisible(false);
+    const parts = [
+      `📋 Quest: ${habit.name}`,
+      habit.description ? habit.description : '',
+      `⚔️ ${habit.difficulty} | 🏷️ ${habit.category}`,
+      `🔥 Streak: ${habit.streak} days`,
+    ].filter(Boolean);
+    await Share.share({ message: parts.join('\n') });
+  };
 
   return (
-    <View className="rounded-[28px] border-2 p-4" style={{ backgroundColor: cardBg, borderColor, opacity: isDoneToday ? 0.6 : 1 }}>
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onViewDetail}
+      className="rounded-[28px] border-2 p-4"
+      style={{ backgroundColor: Colors.boldSurface, borderColor: Colors.boldBorder, opacity: isDoneToday ? 0.6 : 1 }}
+    >
       <View className="flex-row items-center gap-4">
         {/* Check Button */}
         <TouchableOpacity
@@ -134,63 +169,78 @@ function HabitCardItem({ habit, onComplete, onDelete }: { habit: Habit; onComple
           onPress={onComplete}
           className="w-11 h-11 rounded-full border-2 items-center justify-center"
           style={{
-            backgroundColor: isDoneToday ? Colors.boldPrimary : isFeatured ? 'rgba(255,255,255,0.2)' : Colors.boldPrimaryContainer,
-            borderColor: isDoneToday ? Colors.boldPrimary : isFeatured ? Colors.white : Colors.boldPrimary,
+            backgroundColor: isDoneToday ? Colors.boldPrimary : Colors.boldPrimaryContainer,
+            borderColor: Colors.boldPrimary,
           }}
         >
           <Ionicons name="checkmark" size={isDoneToday ? 24 : 20}
-            color={isDoneToday ? Colors.white : isFeatured ? Colors.white : Colors.boldPrimary} />
+            color={isDoneToday ? Colors.white : Colors.boldPrimary} />
         </TouchableOpacity>
 
         {/* Details */}
         <View className="flex-1 gap-1">
           <View className="flex-row gap-1.5">
             <View className="rounded-[6px] px-2 py-0.5"
-              style={{ backgroundColor: isFeatured ? 'rgba(255,255,255,0.2)' : Colors.boldPrimaryContainer }}>
-              <Text className="text-[11px] font-black" style={{ color: isFeatured ? Colors.white : Colors.boldPrimary }}>{habit.category}</Text>
+              style={{ backgroundColor: Colors.boldPrimaryContainer }}>
+              <Text className="text-[11px] font-black" style={{ color: Colors.boldPrimary }}>{habit.category}</Text>
             </View>
             <View className="rounded-[6px] px-2 py-0.5"
-              style={{ backgroundColor: isFeatured ? 'rgba(255,255,255,0.2)' : `${diffColor}26` }}>
-              <Text className="text-[11px] font-black" style={{ color: isFeatured ? Colors.white : diffColor }}>{habit.difficulty}</Text>
+              style={{ backgroundColor: `${diffColor}26` }}>
+              <Text className="text-[11px] font-black" style={{ color: diffColor }}>{habit.difficulty}</Text>
             </View>
           </View>
 
-          <Text className="text-base font-black" style={{ color: contentColor, textDecorationLine: isDoneToday ? 'line-through' : 'none' }}>
+          <Text className="text-base font-black" style={{ color: Colors.boldPrimaryText, textDecorationLine: isDoneToday ? 'line-through' : 'none' }}>
             {habit.name}
           </Text>
 
           {habit.description ? (
-            <Text className="text-xs" style={{ color: subColor }} numberOfLines={2}>{habit.description}</Text>
+            <Text className="text-xs" style={{ color: Colors.boldSecondaryText }} numberOfLines={1}>{habit.description}</Text>
           ) : null}
 
           {habit.dueDate ? (
-            <Text className="text-[11px] font-bold" style={{ color: subColor }}>📅 Due {habit.dueDate}</Text>
+            <Text className="text-[11px] font-bold" style={{ color: Colors.boldSecondaryText }}>📅 Due {habit.dueDate}</Text>
           ) : null}
 
           <View className="flex-row items-center gap-3 mt-1">
-            <Text className="text-xs font-black" style={{ color: isFeatured ? Colors.white : Colors.boldCoral }}>
+            <Text className="text-xs font-black" style={{ color: Colors.boldCoral }}>
               🔥 {habit.streak} Streak
             </Text>
             <View className="flex-row items-center gap-0.5">
-              <Ionicons name="star" size={14} color={isFeatured ? Colors.white : Colors.boldGold} />
-              <Text className="text-[11px] font-bold" style={{ color: subColor }}>
+              <Ionicons name="star" size={14} color={Colors.boldGold} />
+              <Text className="text-[11px] font-bold" style={{ color: Colors.boldSecondaryText }}>
                 +{habit.difficulty === 'Easy' ? 10 : habit.difficulty === 'Medium' ? 20 : 40} XP / +{habit.difficulty === 'Easy' ? 5 : habit.difficulty === 'Medium' ? 10 : 20}g
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Right Action */}
-        {isFeatured ? (
-          <TouchableOpacity className="rounded-full px-3.5 py-2 bg-bold-pink" onPress={onComplete}>
-            <Text className="font-black text-xs" style={{ color: Colors.boldDarkPinkText }}>START</Text>
+        {/* Three-dot menu */}
+        <TouchableOpacity className="p-2" onPress={() => setMenuVisible(true)}>
+          <Ionicons name="ellipsis-vertical" size={20} color={Colors.boldSecondaryText} />
+        </TouchableOpacity>
+
+        <Modal visible={menuVisible} transparent animationType="fade" onRequestClose={() => setMenuVisible(false)}>
+          <TouchableOpacity className="flex-1" activeOpacity={1} onPress={() => setMenuVisible(false)}
+            style={{ backgroundColor: 'rgba(0,0,0,0.3)', justifyContent: 'flex-end' }}>
+            <TouchableOpacity activeOpacity={1} className="bg-bold-surface rounded-t-[28px] px-5 pt-5 pb-8 gap-1">
+              <Text className="text-xs font-black text-bold-text-secondary tracking-widest mb-2">{habit.name}</Text>
+              <TouchableOpacity className="flex-row items-center gap-4 py-3.5" onPress={() => { setMenuVisible(false); onEdit(); }}>
+                <Ionicons name="pencil-outline" size={22} color={Colors.boldPrimary} />
+                <Text className="text-base font-bold text-bold-text">Edit Quest</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="flex-row items-center gap-4 py-3.5" onPress={handleShare}>
+                <Ionicons name="share-social-outline" size={22} color={Colors.boldPrimary} />
+                <Text className="text-base font-bold text-bold-text">Share</Text>
+              </TouchableOpacity>
+              <TouchableOpacity className="flex-row items-center gap-4 py-3.5" onPress={() => { setMenuVisible(false); onDelete(); }}>
+                <Ionicons name="trash-outline" size={22} color="rgba(198,40,40,0.8)" />
+                <Text className="text-base font-bold" style={{ color: 'rgba(198,40,40,0.9)' }}>Delete Quest</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
           </TouchableOpacity>
-        ) : (
-          <TouchableOpacity className="p-1" onPress={onDelete}>
-            <Ionicons name="trash-outline" size={22} color="rgba(198,40,40,0.8)" />
-          </TouchableOpacity>
-        )}
+        </Modal>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

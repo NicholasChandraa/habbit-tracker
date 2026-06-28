@@ -1,20 +1,19 @@
 {
   "expo": {
-    "name": "habit-tracker-rn",
+    "name": "Habit Tracker",
     "slug": "habit-tracker-rn",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo_ht.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.nicholaschandara.habittracker",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "foregroundImage": "./assets/logo_ht.png",
+        "backgroundColor": "#FFFFFF"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -24,6 +23,11 @@
     "plugins": [
       "expo-sqlite",
       "@react-native-community/datetimepicker"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "897540dd-7752-4af7-9e08-63566d54c1ae"
+      }
+    }
   }
 }

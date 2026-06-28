@@ -8,6 +8,7 @@ import {
   insertHabit,
   deleteHabit,
   completeHabit,
+  updateHabit,
   claimQuestReward,
   buyShopItem,
   useXPBoostPotion,
@@ -50,6 +51,7 @@ const initialState: HabitState = {
 interface HabitContextValue extends HabitState {
   refresh: () => Promise<void>;
   addHabit: (name: string, description: string, difficulty: string, category: string, dueDate?: string) => Promise<void>;
+  editHabit: (id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate'>>) => Promise<void>;
   removeHabit: (habitId: number) => Promise<void>;
   markHabitComplete: (habit: Habit) => Promise<void>;
   claimQuest: (quest: DailyQuest) => Promise<void>;
@@ -88,6 +90,11 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
     await refresh();
   }, [refresh]);
 
+  const editHabit = useCallback(async (id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate'>>) => {
+    await updateHabit(id, updates);
+    await refresh();
+  }, [refresh]);
+
   const removeHabit = useCallback(async (habitId: number) => {
     await deleteHabit(habitId);
     await refresh();
@@ -123,6 +130,7 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
       ...state,
       refresh,
       addHabit,
+      editHabit,
       removeHabit,
       markHabitComplete,
       claimQuest,

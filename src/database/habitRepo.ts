@@ -34,6 +34,14 @@ export async function insertHabit(name: string, description: string, difficulty:
   );
 }
 
+export async function updateHabit(id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate'>>): Promise<void> {
+  const database = await getDatabase();
+  await database.runAsync(
+    'UPDATE habits SET name=?, description=?, difficulty=?, category=?, due_date=? WHERE id=?',
+    [updates.name ?? '', updates.description ?? '', updates.difficulty ?? '', updates.category ?? '', updates.dueDate ?? '', id]
+  );
+}
+
 export async function deleteHabit(habitId: number): Promise<void> {
   const database = await getDatabase();
   await database.runAsync('DELETE FROM habits WHERE id = ?', [habitId]);
