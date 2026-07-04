@@ -6,13 +6,21 @@ A habit tracking app with RPG game mechanics. Complete daily habits to earn XP, 
 
 ## Screenshots
 
-| Dashboard | Daily Quests | Active Quests |
-|:---------:|:------------:|:-------------:|
+|              Dashboard              |              Daily Quests              |              Active Quests              |
+| :---------------------------------: | :------------------------------------: | :-------------------------------------: |
 | ![Dashboard](assets/ss-layar-1.png) | ![Daily Quests](assets/ss-layar-4.png) | ![Active Quests](assets/ss-layar-3.png) |
 
-| Completed & History | Armory & Shop |
-|:-------------------:|:-------------:|
+|         Completed & History         |          Armory & Shop           |
+| :---------------------------------: | :------------------------------: |
 | ![Completed](assets/ss-layar-5.png) | ![Armory](assets/ss-layar-2.png) |
+
+---
+
+## 📥 Download App
+
+You can download the latest Android APK directly:
+
+[![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge&logo=android)](./habbit-tracker-android.apk)
 
 ---
 
@@ -32,14 +40,14 @@ A habit tracking app with RPG game mechanics. Complete daily habits to earn XP, 
 
 ## Tech Stack
 
-| | |
-|---|---|
-| Framework | React Native + Expo SDK 56 |
-| Language | TypeScript |
-| Styling | NativeWind v4 (Tailwind CSS) |
-| Navigation | React Navigation (Bottom Tabs) |
-| Database | expo-sqlite (local SQLite) |
-| Build | EAS Build (Expo Application Services) |
+|            |                                       |
+| ---------- | ------------------------------------- |
+| Framework  | React Native + Expo SDK 56            |
+| Language   | TypeScript                            |
+| Styling    | NativeWind v4 (Tailwind CSS)          |
+| Navigation | React Navigation (Bottom Tabs)        |
+| Database   | expo-sqlite (local SQLite)            |
+| Build      | EAS Build (Expo Application Services) |
 
 ---
 
@@ -147,12 +155,12 @@ Generates an AAB file ready to upload to Google Play Console.
 
 All data is stored locally on-device using SQLite via `expo-sqlite`. No internet connection required.
 
-| Table | Description |
-|-------|-------------|
-| `habits` | All habits/quests |
-| `user_stats` | XP, level, coins, streak, avatar |
-| `daily_quests` | Daily quest progress |
-| `habit_completions` | Completion history log |
+| Table               | Description                      |
+| ------------------- | -------------------------------- |
+| `habits`            | All habits/quests                |
+| `user_stats`        | XP, level, coins, streak, avatar |
+| `daily_quests`      | Daily quest progress             |
+| `habit_completions` | Completion history log           |
 
 ---
 
