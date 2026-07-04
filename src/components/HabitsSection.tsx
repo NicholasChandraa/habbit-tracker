@@ -14,10 +14,7 @@ interface Props {
   onViewDetail: (habit: Habit) => void;
 }
 
-const TODAY = (() => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-})();
+
 
 function getDifficultyColor(difficulty: string) {
   switch (difficulty) {
@@ -29,9 +26,13 @@ function getDifficultyColor(difficulty: string) {
 }
 
 export function HabitsSection({ habits, selectedCategory, onCategoryChange, onComplete, onDelete, onEdit, onViewDetail }: Props) {
+  const today = (() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  })();
   const filtered = selectedCategory === 'All' ? habits : habits.filter(h => h.category === selectedCategory);
-  const active = filtered.filter(h => h.lastCompletedDate !== TODAY);
-  const done   = filtered.filter(h => h.lastCompletedDate === TODAY);
+  const active = filtered.filter(h => h.lastCompletedDate !== today);
+  const done   = filtered.filter(h => h.lastCompletedDate === today);
 
   return (
     <View className="gap-3">
@@ -77,6 +78,7 @@ export function HabitsSection({ habits, selectedCategory, onCategoryChange, onCo
           <HabitCardItem
             key={habit.id}
             habit={habit}
+            today={today}
             onComplete={() => onComplete(habit)}
             onDelete={() => onDelete(habit.id)}
             onEdit={() => onEdit(habit)}
@@ -87,7 +89,7 @@ export function HabitsSection({ habits, selectedCategory, onCategoryChange, onCo
 
       {/* Completed Today */}
       {done.length > 0 && (
-        <CompletedTodaySection done={done} onComplete={onComplete} onDelete={onDelete} onEdit={onEdit} onViewDetail={onViewDetail} />
+        <CompletedTodaySection done={done} today={today} onComplete={onComplete} onDelete={onDelete} onEdit={onEdit} onViewDetail={onViewDetail} />
       )}
     </View>
   );
@@ -95,8 +97,9 @@ export function HabitsSection({ habits, selectedCategory, onCategoryChange, onCo
 
 const PAGE_SIZE = 5;
 
-function CompletedTodaySection({ done, onComplete, onDelete, onEdit, onViewDetail }: {
+function CompletedTodaySection({ done, today, onComplete, onDelete, onEdit, onViewDetail }: {
   done: Habit[];
+  today: string;
   onComplete: (habit: Habit) => void;
   onDelete: (habitId: number) => void;
   onEdit: (habit: Habit) => void;
@@ -118,6 +121,7 @@ function CompletedTodaySection({ done, onComplete, onDelete, onEdit, onViewDetai
         <HabitCardItem
           key={habit.id}
           habit={habit}
+          today={today}
           onComplete={() => onComplete(habit)}
           onDelete={() => onDelete(habit.id)}
           onEdit={() => onEdit(habit)}
@@ -133,14 +137,15 @@ function CompletedTodaySection({ done, onComplete, onDelete, onEdit, onViewDetai
   );
 }
 
-function HabitCardItem({ habit, onComplete, onDelete, onEdit, onViewDetail }: {
+function HabitCardItem({ habit, today, onComplete, onDelete, onEdit, onViewDetail }: {
   habit: Habit;
+  today: string;
   onComplete: () => void;
   onDelete: () => void;
   onEdit: () => void;
   onViewDetail: () => void;
 }) {
-  const isDoneToday = habit.lastCompletedDate === TODAY;
+  const isDoneToday = habit.lastCompletedDate === today;
   const diffColor = getDifficultyColor(habit.difficulty);
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -150,7 +155,7 @@ function HabitCardItem({ habit, onComplete, onDelete, onEdit, onViewDetail }: {
       `📋 Quest: ${habit.name}`,
       habit.description ? habit.description : '',
       `⚔️ ${habit.difficulty} | 🏷️ ${habit.category}`,
-      `🔥 Streak: ${habit.streak} days`,
+      habit.isOneTime ? `🎯 One-Time Quest` : `🔥 Streak: ${habit.streak} days`,
     ].filter(Boolean);
     await Share.share({ message: parts.join('\n') });
   };
@@ -179,7 +184,7 @@ function HabitCardItem({ habit, onComplete, onDelete, onEdit, onViewDetail }: {
 
         {/* Details */}
         <View className="flex-1 gap-1">
-          <View className="flex-row gap-1.5">
+          <View className="flex-row gap-1.5 flex-wrap">
             <View className="rounded-[6px] px-2 py-0.5"
               style={{ backgroundColor: Colors.boldPrimaryContainer }}>
               <Text className="text-[11px] font-black" style={{ color: Colors.boldPrimary }}>{habit.category}</Text>
@@ -187,6 +192,12 @@ function HabitCardItem({ habit, onComplete, onDelete, onEdit, onViewDetail }: {
             <View className="rounded-[6px] px-2 py-0.5"
               style={{ backgroundColor: `${diffColor}26` }}>
               <Text className="text-[11px] font-black" style={{ color: diffColor }}>{habit.difficulty}</Text>
+            </View>
+            <View className="rounded-[6px] px-2 py-0.5"
+              style={{ backgroundColor: habit.isOneTime ? 'rgba(0,188,212,0.15)' : 'rgba(233,30,99,0.15)' }}>
+              <Text className="text-[11px] font-black" style={{ color: habit.isOneTime ? Colors.boldCyan : Colors.boldCoral }}>
+                {habit.isOneTime ? 'One-Time' : 'Daily'}
+              </Text>
             </View>
           </View>
 
@@ -203,9 +214,15 @@ function HabitCardItem({ habit, onComplete, onDelete, onEdit, onViewDetail }: {
           ) : null}
 
           <View className="flex-row items-center gap-3 mt-1">
-            <Text className="text-xs font-black" style={{ color: Colors.boldCoral }}>
-              🔥 {habit.streak} Streak
-            </Text>
+            {habit.isOneTime ? (
+              <Text className="text-xs font-black" style={{ color: Colors.boldCyan }}>
+                🎯 One-Time
+              </Text>
+            ) : (
+              <Text className="text-xs font-black" style={{ color: Colors.boldCoral }}>
+                🔥 {habit.streak} Streak
+              </Text>
+            )}
             <View className="flex-row items-center gap-0.5">
               <Ionicons name="star" size={14} color={Colors.boldGold} />
               <Text className="text-[11px] font-bold" style={{ color: Colors.boldSecondaryText }}>

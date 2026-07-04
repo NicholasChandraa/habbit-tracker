@@ -67,6 +67,10 @@ export async function checkDailyRefresh(): Promise<void> {
   ];
 
   const database = await getDatabase();
+  
+  // Clean up completed one-time habits when day changes
+  await database.runAsync("DELETE FROM habits WHERE is_one_time = 1 AND last_completed_date != ''");
+
   await database.runAsync('DELETE FROM daily_quests');
   for (const q of freshQuests) {
     await database.runAsync(

@@ -50,8 +50,8 @@ const initialState: HabitState = {
 
 interface HabitContextValue extends HabitState {
   refresh: () => Promise<void>;
-  addHabit: (name: string, description: string, difficulty: string, category: string, dueDate?: string) => Promise<void>;
-  editHabit: (id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate'>>) => Promise<void>;
+  addHabit: (name: string, description: string, difficulty: string, category: string, dueDate?: string, isOneTime?: boolean) => Promise<void>;
+  editHabit: (id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate' | 'isOneTime'>>) => Promise<void>;
   removeHabit: (habitId: number) => Promise<void>;
   markHabitComplete: (habit: Habit) => Promise<void>;
   claimQuest: (quest: DailyQuest) => Promise<void>;
@@ -85,12 +85,12 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
     })();
   }, [refresh]);
 
-  const addHabit = useCallback(async (name: string, description: string, difficulty: string, category: string, dueDate = '') => {
-    await insertHabit(name, description, difficulty, category, dueDate);
+  const addHabit = useCallback(async (name: string, description: string, difficulty: string, category: string, dueDate = '', isOneTime = false) => {
+    await insertHabit(name, description, difficulty, category, dueDate, isOneTime);
     await refresh();
   }, [refresh]);
 
-  const editHabit = useCallback(async (id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate'>>) => {
+  const editHabit = useCallback(async (id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate' | 'isOneTime'>>) => {
     await updateHabit(id, updates);
     await refresh();
   }, [refresh]);

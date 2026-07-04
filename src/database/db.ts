@@ -35,7 +35,8 @@ async function initSchema(database: SQLite.SQLiteDatabase): Promise<void> {
       streak INTEGER NOT NULL DEFAULT 0,
       last_completed_date TEXT NOT NULL DEFAULT '',
       created_timestamp INTEGER NOT NULL DEFAULT 0,
-      due_date TEXT NOT NULL DEFAULT ''
+      due_date TEXT NOT NULL DEFAULT '',
+      is_one_time INTEGER NOT NULL DEFAULT 0
     );
 
     CREATE TABLE IF NOT EXISTS daily_quests (
@@ -63,4 +64,5 @@ async function initSchema(database: SQLite.SQLiteDatabase): Promise<void> {
   `);
   // ponytail: migrate existing installs — throws if column exists, that's fine
   try { await database.execAsync(`ALTER TABLE habits ADD COLUMN due_date TEXT NOT NULL DEFAULT ''`); } catch {}
+  try { await database.execAsync(`ALTER TABLE habits ADD COLUMN is_one_time INTEGER NOT NULL DEFAULT 0`); } catch {}
 }

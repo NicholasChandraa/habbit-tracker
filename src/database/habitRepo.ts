@@ -16,6 +16,7 @@ function rowToHabit(row: any): Habit {
     lastCompletedDate: row.last_completed_date,
     createdTimestamp: row.created_timestamp,
     dueDate: row.due_date ?? '',
+    isOneTime: row.is_one_time === 1,
   };
 }
 
@@ -25,20 +26,30 @@ export async function fetchHabits(): Promise<Habit[]> {
   return rows.map(rowToHabit);
 }
 
-export async function insertHabit(name: string, description: string, difficulty: string, category: string, dueDate = ''): Promise<void> {
+export async function insertHabit(name: string, description: string, difficulty: string, category: string, dueDate = '', isOneTime = false): Promise<void> {
   const database = await getDatabase();
   await database.runAsync(
-    `INSERT INTO habits (name, description, difficulty, category, streak, last_completed_date, created_timestamp, due_date)
-     VALUES (?, ?, ?, ?, 0, '', ?, ?)`,
-    [name, description, difficulty, category, Date.now(), dueDate]
+    `INSERT INTO habits (name, description, difficulty, category, streak, last_completed_date, created_timestamp, due_date, is_one_time)
+     VALUES (?, ?, ?, ?, 0, '', ?, ?, ?)`,
+    [name, description, difficulty, category, Date.now(), dueDate, isOneTime ? 1 : 0]
   );
 }
 
-export async function updateHabit(id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate'>>): Promise<void> {
+export async function updateHabit(id: number, updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate' | 'isOneTime'>>): Promise<void> {
   const database = await getDatabase();
+  const existing = await database.getFirstAsync<any>('SELECT * FROM habits WHERE id = ?', [id]);
+  if (!existing) return;
+
+  const name = updates.name !== undefined ? updates.name : existing.name;
+  const description = updates.description !== undefined ? updates.description : existing.description;
+  const difficulty = updates.difficulty !== undefined ? updates.difficulty : existing.difficulty;
+  const category = updates.category !== undefined ? updates.category : existing.category;
+  const dueDate = updates.dueDate !== undefined ? updates.dueDate : existing.due_date;
+  const isOneTime = updates.isOneTime !== undefined ? (updates.isOneTime ? 1 : 0) : existing.is_one_time;
+
   await database.runAsync(
-    'UPDATE habits SET name=?, description=?, difficulty=?, category=?, due_date=? WHERE id=?',
-    [updates.name ?? '', updates.description ?? '', updates.difficulty ?? '', updates.category ?? '', updates.dueDate ?? '', id]
+    'UPDATE habits SET name=?, description=?, difficulty=?, category=?, due_date=?, is_one_time=? WHERE id=?',
+    [name, description, difficulty, category, dueDate, isOneTime, id]
   );
 }
 

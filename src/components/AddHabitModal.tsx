@@ -9,8 +9,8 @@ import { Colors } from '../theme/colors';
 interface Props {
   visible: boolean;
   onDismiss: () => void;
-  onAdd: (name: string, description: string, difficulty: string, category: string, dueDate: string) => void;
-  onEdit?: (updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate'>>) => void;
+  onAdd: (name: string, description: string, difficulty: string, category: string, dueDate: string, isOneTime: boolean) => void;
+  onEdit?: (updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate' | 'isOneTime'>>) => void;
   editHabit?: Habit;
 }
 
@@ -95,6 +95,7 @@ export function AddHabitModal({ visible, onDismiss, onAdd, onEdit, editHabit }: 
   const [category, setCategory] = useState<Habit['category']>('Health');
   const [dueDate, setDueDate] = useState<Date | null>(null);
   const [showIOSPicker, setShowIOSPicker] = useState(false);
+  const [isOneTime, setIsOneTime] = useState(true); // Default to One-Time
 
   // Pre-fill when editing
   useEffect(() => {
@@ -104,6 +105,7 @@ export function AddHabitModal({ visible, onDismiss, onAdd, onEdit, editHabit }: 
       setDifficulty(editHabit.difficulty);
       setCategory(editHabit.category);
       setDueDate(parseDateString(editHabit.dueDate));
+      setIsOneTime(editHabit.isOneTime);
     }
   }, [editHabit]);
 
@@ -122,15 +124,16 @@ export function AddHabitModal({ visible, onDismiss, onAdd, onEdit, editHabit }: 
   const reset = () => {
     setName(''); setDescription(''); setDifficulty('Easy');
     setCategory('Health'); setDueDate(null); setShowIOSPicker(false);
+    setIsOneTime(true);
   };
 
   const handleSubmit = () => {
     if (!name.trim()) return;
     const dueDateStr = dueDate ? toDateString(dueDate) : '';
     if (isEditMode && onEdit) {
-      onEdit({ name: name.trim(), description: description.trim(), difficulty, category, dueDate: dueDateStr });
+      onEdit({ name: name.trim(), description: description.trim(), difficulty, category, dueDate: dueDateStr, isOneTime });
     } else {
-      onAdd(name.trim(), description.trim(), difficulty, category, dueDateStr);
+      onAdd(name.trim(), description.trim(), difficulty, category, dueDateStr, isOneTime);
     }
     reset();
   };
@@ -186,6 +189,31 @@ export function AddHabitModal({ visible, onDismiss, onAdd, onEdit, editHabit }: 
               />
             </View>
 
+            {/* Quest Type */}
+            <View className="gap-2">
+              <Text className="text-sm font-black text-bold-text">Quest Type</Text>
+              <View className="flex-row gap-2">
+                <TouchableOpacity
+                  className="flex-1 rounded-xl px-3.5 py-2.5 items-center"
+                  style={{ backgroundColor: isOneTime ? Colors.boldPrimary : Colors.boldPrimaryContainer }}
+                  onPress={() => setIsOneTime(true)}
+                >
+                  <Text className="text-[13px] font-black" style={{ color: isOneTime ? Colors.white : Colors.boldPrimaryText }}>
+                    One-Time
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 rounded-xl px-3.5 py-2.5 items-center"
+                  style={{ backgroundColor: !isOneTime ? Colors.boldPrimary : Colors.boldPrimaryContainer }}
+                  onPress={() => setIsOneTime(false)}
+                >
+                  <Text className="text-[13px] font-black" style={{ color: !isOneTime ? Colors.white : Colors.boldPrimaryText }}>
+                    Daily Habit
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
             {/* Difficulty */}
             <View className="gap-2">
               <Text className="text-sm font-black text-bold-text">Difficulty Rank</Text>
@@ -212,7 +240,7 @@ export function AddHabitModal({ visible, onDismiss, onAdd, onEdit, editHabit }: 
             <View className="gap-2">
               <Text className="text-sm font-black text-bold-text">Category</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
-                {CATEGORIES.filter(c => c !== 'All').map((cat) => {
+                {CATEGORIES.filter((c): c is Habit['category'] => c !== 'All').map((cat) => {
                   const isSelected = category === cat;
                   return (
                     <TouchableOpacity

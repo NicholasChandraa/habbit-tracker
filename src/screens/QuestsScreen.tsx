@@ -22,7 +22,7 @@ export function QuestsScreen() {
     setShowAddModal(true);
   };
 
-  const handleSaveEdit = async (updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate'>>) => {
+  const handleSaveEdit = async (updates: Partial<Pick<Habit, 'name' | 'description' | 'difficulty' | 'category' | 'dueDate' | 'isOneTime'>>) => {
     if (!editingHabit) return;
     await editHabit(editingHabit.id, updates);
     setShowAddModal(false);
@@ -69,9 +69,9 @@ export function QuestsScreen() {
         visible={showAddModal}
         onDismiss={handleDismissModal}
         editHabit={editingHabit ?? undefined}
-        onAdd={async (name, desc, diff, cat, dueDate) => {
+        onAdd={async (name, desc, diff, cat, dueDate, isOneTime) => {
           setShowAddModal(false);
-          await addHabit(name, desc, diff, cat, dueDate);
+          await addHabit(name, desc, diff, cat, dueDate, isOneTime);
         }}
         onEdit={handleSaveEdit}
       />

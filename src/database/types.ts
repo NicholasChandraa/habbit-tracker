@@ -23,6 +23,7 @@ export interface Habit {
   lastCompletedDate: string;
   createdTimestamp: number;
   dueDate: string; // 'YYYY-MM-DD' or '' if none
+  isOneTime: boolean;
 }
 
 export interface DailyQuest {
